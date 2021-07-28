@@ -4,59 +4,72 @@ A template-based method for ATP-specific protein-ligand docking.
 ## Pre-requisite:
     - Python3, Java
     - MGLTools software (http://mgltools.scripps.edu/downloads)
-    - Open Babel software (http://openbabel.org/wiki/Category:Installation)
-    - PL-DB database (https://github.com/brightrao/PL-DB1/tree/master, https://github.com/bright197/PL-DB2, https://github.com/brightzjut/PL-DB3)
+    - OpenBabel software (http://openbabel.org/wiki/Category:Installation)
     - Linux system
 
 ## Installation:
 
-*Download this repository at https://github.com/brightrao/ATPdock.git.
+*Install and configure the softwares of Python3, Java, MGLTools and OpenBabel in your Linux system. Please make sure that python3 includes the modules of 'os', 'math', 'numpy', 'random', 'subprocess', 'sys', and 'shutil'. If any one modules does not exist, please using 'pip3 install XXXX' command install the python revelant module. Here, "XXXX" is one module name.
 
- 1. Accessing basefile folder, perform bellow opration.
+*Download this repository at https://github.com/brightrao/ATPdock.git. Then, uncompress it and run the following command lines on Linux System.
 
-        1.1 Install MGLTools software, which is available http://mgltools.scripps.edu/downloads. 
-          1.1.1 Accessing /mgltools_x86_64Linux2_1.5.6/bin, copy 'pythonsh' file to basefile folder.
-          1.1.2 Accessing /mgltools_x86_64Linux2_1.5.6/MGLToolsPckgs/AutoDockTools/Utilities24, copy 'prepare_ligand4.py' and 'prepare_receptor4.py' to basefile folder.
 
-        1.2 Install Open Babel software, which is available http://openbabel.org/wiki/Category:Installation.
-    
- 2. Creating pocket-ligand database(PLDB).
+~~~
+  $ chmod -R 777 ./software
+  $ chmod -R 777 ./basefile
+  $ java -jar FileUnion.jar ./PLDB/ ./PLDB.tar.gz
+  $ rm -rf ./PLDB
+  $ tar zxvf PLDB.tar.gz
+  $ cp [THE INSTALLATION PATH OF MGLTools]/bin/pythonsh ./basefile
+  $ cp [THE INSTALLATION PATH OF MGLTools]/MGLToolsPckgs/AutoDockTools/Utilities24/prepare_ligand4.py ./basefile
+  $ cp [THE INSTALLATION PATH OF MGLTools]/MGLToolsPckgs/AutoDockTools/Utilities24/prepare_receptor4.py ./basefile
+~~~
 
-        2.1 Download pocket-ligand database(PLDB) from three web sites,
-            https://github.com/brightrao/PL-DB1/tree/master, 
-            https://github.com/bright197/PL-DB2, 
-            https://github.com/brightzjut/PL-DB3. 		
-        2.2 Creating a new "Database" folder under the path "ATPdock/PPS-search/" and put these files in this folder.
-        2.3 Extracting all the compressed file, merge 10 compressed files about pocket, i.e. poc1 to poc10, into one file and name it "poc".
-        2.4 In ATPdock/PPS-search/database, "database" folder should contain three file, i.e. poc, lig folder and "db_poclig_info_cd99.list" file.
-    
- 3. Qualify Linux system has python3 version, and include 'os', 'math', 'numpy', 'random', 'subprocess', 'sys', 'shutil' package. If a packege does not exist, using 'pip3 install xxxx' command install python revelant package. "xxxx" is the name of the package.
-  
-## Docking files preparation:
+NOTE THAT, [THE INSTALLATION PATH OF MGLTools] SHOULD BE THE MGLTools INSTALLATION PATH.
 
-Creating a docking folder (e.g., example folder), it contain three file, i.e., pdb.pdb, tem.txt and pdb.site.
+*The file of "Config.properties" should be set as follows:
+~~~
+PPSALIGN_EXE_ABOSOLTE_PATH=XXX/software/PPSalign
+APOC_EXE_ABOSOLTE_PATH=XXX/software/apoc
+PPSSEARCH_DATABASE_ABOSOLTE_PATH=XXX/PLDB
+~~~
 
-    1. pdb.pdb is receptor structure file.
-    2. tem.txt has two lines
-       first line is sequence identity cutoff, input a value belongs to [0.3,1], when searching template pocket.   
-       second line is searched ligand type. If only search for template proteins that bind to ATP and ADP, the second line is ~ATP~~ADP~. If all ligand types are allowed, the second line is NULL.
-    3. pdb.site is binding residues type and index, every line means every pocket, user can define multiple binding pockets of the protein.
-        for example, a protein have two binding pockets, there are two lines.
+NOTE THAT, THE ABOVE "XXX" SHOULD BE THE ABSOLUTE PATH OF THE DOWNLOADED ATPDOCK PACKAGE, e.g., /home/junh/ATPdock-main
+
+
+## Prepare the query folder
+
+*The query folder have to contain three files, i.e., "pdb.pdb", "tem.txt", "pdb.site".
+~~~
+"pdb.pdb" contains the 3D structure information of the query receptor protein in PDB format.
+
+"tem.txt" has two lines: 1) the first line is sequence identity cutoff, ranging from 0.3 to 1 (suggested 0.3); 
+                         2) the second line is searched ligand type. If only search for template proteins that bind to ATP and ADP, the second line is ~ATP~~ADP~. If all ligand types are allowed, the second line is NULL. More ligand type information could be found at https://zhanglab.ccmb.med.umich.edu/BioLiP/ligand.html. For example,
+        0.3
+        ~ATP~~ADP~~AMP~~GTP~~GDP~
+
+"pdb.site" is the information of binding residue type and index. In this file, each line means one pocket. User can define multiple binding pockets of the protein. For example, if one protein has two binding pockets, there are two lines, i.e.,
         V10 G38 C39 G40 R61 P89 G90 D91 G92 K93
         E65 I66 V67 N104 R106
-   
-Note that, because ATPbind depend on several large database(more than 5G disk memory), and it can be using by webserver, ATPdock standalone program has not support ATPbind standalone program. You can access ATPbind server(https://zhanglab.ccmb.med.umich.edu/ATPbind/), obtain ATP binding residues of the receptor, write pdb.site according under fasta.
-     
+~~~
+
+NOTE THAT, IF YOU DONOT KWON THE ATP-BINDING POCKET INFORMATION OF THE QUERY PROTEIN, WE STRONGLY SUGGESTED THAT USING THE WEB-SERVER OF ATPbind (https://zhanglab.ccmb.med.umich.edu/ATPbind/) TO PREDICTED ITS BINDING POCKETS. BASED ON THE ATPbind-PREDICTED POCKET, PREPARING THE FILE OF "pdb.site".
+
+
 ## Run example
 ~~~
-  $ python3 ATPdock.py yy/example
+  $ python3 ATPdock.py [ABSOLUTE PATH OF THE QUERY FOLDER]
 ~~~
-Note that, "yy" should be the absolute path of the example folder.
-The outputted "ATPx" folder, "x" is a number. In the folder, "final.pdb" is the docking result of ATP.
+NOTE THAT, [ABSOLUTE PATH OF THE QUERY FOLDER] SHOULD BE THE ABSOLUTE PATH OF THE QUERY FOLDER, e.g., /home/junh/ATPdock-main/example.
+
+## The docking result
+
+*The docking result of each pocket should be found in the outputted folder, i.e., "ATPx", where "x" is the pocket index number. In each "ATPx" folder, the ATP docking pose could be found in the file of "final.pdb".
 
 ## Update History:
 
-- First release 2021-05-31
+- First release     2021-05-31 (see https://github.com/brightrao/ATPdock/)
+- Update PPS-search 2021-07-28
 
 ## References
 
